@@ -11,8 +11,10 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
-public class Client {
+public class Client implements Runnable {
 	
 	private String userName;
 	private String userPath;
@@ -51,14 +53,15 @@ public class Client {
 			userFile.createNewFile();
 	}
 	
+	//https://www.youtube.com/watch?v=fcNp2SsWOeM
 	public void watchDirectory() {
 		try(WatchService service = FileSystems.getDefault().newWatchService()){
 			Map<WatchKey, Path> keyMap = new HashMap<>();
 			Path path = Paths.get(userPath);
 			keyMap.put(path.register(service,
-					StandardWatchEventKinds.ENTRY_CREATE,
-					StandardWatchEventKinds.ENTRY_DELETE,
-					StandardWatchEventKinds.ENTRY_MODIFY),
+					StandardWatchEventKinds.ENTRY_CREATE),
+					//StandardWatchEventKinds.ENTRY_DELETE,
+					//StandardWatchEventKinds.ENTRY_MODIFY),
 					path);
 			
 			WatchKey watchKey;
@@ -70,7 +73,7 @@ public class Client {
 				for(WatchEvent<?> event : watchKey.pollEvents()){
 					WatchEvent.Kind<?> kind = event.kind();
 					Path eventPath = (Path)event.context();
-					System.out.println(eventDir + ": " + kind + ": " + eventPath);
+					sendFileToServer(eventPath);
 				}
 			} while (watchKey.reset());
 			
@@ -80,6 +83,16 @@ public class Client {
 	}
 	
 	public void synchronizeDirectories(){
+		//synchro with server after start client
+	}
+	
+	public void sendFileToServer(Path eventPath){
+		System.out.println("Sending file: " + eventPath + " to server");
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		
 	}
 
