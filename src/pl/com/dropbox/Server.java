@@ -2,21 +2,23 @@ package pl.com.dropbox;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Server implements Runnable {
-	private String main_path; //gdzie sie znajduje glowny folder serverow
+	
+	private BlockingQueue<Message> queue;
+	
+	private static final String main_path = "C:\\Servers";
 	private String serv_name;
-	private String file_name; //plik ktory ma zostac utworzony (plik wysylany)
-	private String user_name; //nazwa usera - stworzenie nowego folderu w folderze serv.
+	private String user_name;
 	
 	private File user_file;   //plik tworzony
 	
-	public Server(String path, String f_name, String u_name, String s_name){
-		this.main_path = path;
-		this.file_name = f_name;
+	public Server(String u_name, String s_name, BlockingQueue<Message> q){
 		this.user_name = u_name;
 		this.serv_name = s_name;
+		this.queue = q;
 	}
 
 	public void createDirectoryServer(){
@@ -32,15 +34,15 @@ public class Server implements Runnable {
 			System.out.println("Server directory " + directory + " exists");
 		}
 	}
-	public void createFileServer(){
+	public void createFileServer(String name){
 		try{
-			String fileFullName = main_path + "\\" + serv_name + "\\"+ user_name + "\\" + file_name + ".txt";
+			String fileFullName = main_path + "\\" + serv_name + "\\"+ user_name + "\\" + name + ".txt";
 			user_file = new File(fileFullName);
 			if(!user_file.exists()){
 				user_file.createNewFile();
-				System.out.println("ServerFile: " + file_name + " has been created");
+				System.out.println("ServerFile: " + name + " has been created");
 			} else
-				System.out.println("ServerFile: " + file_name + " exist");
+				System.out.println("ServerFile: " + name + " exist");
 
 		} catch(IOException e){
 			e.printStackTrace();
@@ -56,10 +58,13 @@ public class Server implements Runnable {
 	@Override
 	public void run() {
 		try{
+			System.out.println("SERVER" + serv_name + " STARTED!");
 			System.out.println("File size = " + getSize());
 			Thread.sleep(getSize());
 			createDirectoryServer();
-			createFileServer();
+			Thread.sleep(4000);
+			Message msg = queue.take();
+			createFileServer(msg.getFileName());
 		} catch(InterruptedException e){
 			e.printStackTrace();
 		}

@@ -76,7 +76,12 @@ public class Client implements Runnable {
 				for(WatchEvent<?> event : watchKey.pollEvents()){
 					WatchEvent.Kind<?> kind = event.kind();
 					Path eventPath = (Path)event.context();
-					sendFileToServer(eventPath);
+					if(!eventPath.toString().equals("__EXIT.txt"))
+						sendFileToServer(eventPath);
+					else{
+						System.out.println("Thread: " + Thread.currentThread().getName() + " has been finished");
+						return;
+					}
 				}
 			} while (watchKey.reset());
 			
