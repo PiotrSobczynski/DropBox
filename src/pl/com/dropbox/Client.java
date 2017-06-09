@@ -11,6 +11,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
@@ -19,19 +20,19 @@ public class Client implements Runnable {
 	private String userName;
 	private String userPath;
 	private File userFile;
+	private BlockingQueue<Message> queue;
 	
-	public Client(String userName, String userPath) throws IOException{
+	public Client(String userName, String userPath, BlockingQueue<Message> q){
 		this.userName = userName;
 		this.userPath = userPath;
-		createDirectory();
-		watchDirectory();
+		this.queue = q;
 		//createFile();
 	}
 	
 	public void createDirectory() 
 			throws IOException {
-		
-		File directory = new File(userPath.toString());
+		System.out.println("Creating Directory");
+		File directory = new File(userPath);
 		
 		if(!directory.exists()){
 			if(directory.mkdirs()){
@@ -49,8 +50,10 @@ public class Client implements Runnable {
 		
 		String fileFullName = userPath + "\\" + userName + ".txt";
 		userFile = new File(fileFullName);
-		if(!userFile.exists())
-			userFile.createNewFile();
+		if(userFile.createNewFile())
+			System.out.println("ClientFile has been created");
+		else
+			System.out.println("ClientFile exists!");
 	}
 	
 	//https://www.youtube.com/watch?v=fcNp2SsWOeM
@@ -88,11 +91,32 @@ public class Client implements Runnable {
 	
 	public void sendFileToServer(Path eventPath){
 		System.out.println("Sending file: " + eventPath + " to server");
+		Message msg = new Message(userName, eventPath.toString());
+		//trzeba pomyslec jak zakonczyc - wyslac message exit
+		try {
+			queue.put(msg);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
+	
 
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
+		try {
+			createDirectory();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		synchronizeDirectories();
+		
+		while(true){
+			watchDirectory();
+		}
 		
 	}
 
