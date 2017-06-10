@@ -6,7 +6,7 @@ import java.util.concurrent.BlockingQueue;
 public class MyExecutor implements Runnable{
 
 	private BlockingQueue<Message> main_queue;
-	private static final int serv_capacity = 10;
+	private static final float serv_capacity = 10;
 	
 	private BlockingQueue<Message> s1_queue = new ArrayBlockingQueue<>(30);
 	private BlockingQueue<Message> s2_queue = new ArrayBlockingQueue<>(30);
@@ -32,7 +32,13 @@ public class MyExecutor implements Runnable{
 		tab_capp[2] = s3_queue.size()/serv_capacity;
 		tab_capp[3] = s4_queue.size()/serv_capacity;
 		tab_capp[4] = s5_queue.size()/serv_capacity;
-		
+		/*
+		System.out.println("S1 cap = " + tab_capp[0]);
+		System.out.println("S2 cap = " + tab_capp[1]);
+		System.out.println("S3 cap = " + tab_capp[2]);
+		System.out.println("S4 cap = " + tab_capp[3]);
+		System.out.println("S5 cap = " + tab_capp[4]);
+		*/
 		float min_cap = 11;
 		int min_cap_index = 0; //dummy value - always changed
 		

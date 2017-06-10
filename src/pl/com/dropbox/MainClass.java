@@ -15,6 +15,10 @@ public class MainClass {
 		Thread t_p = new Thread(p);
 		t_p.start();
 		
+		Client p2 = new Client("Staszek", "C:\\Locally\\Staszek", myQueue);
+		Thread t_p2 = new Thread(p2);
+		t_p2.start();
+		
 		MyExecutor e = new MyExecutor(myQueue);
 		Thread t_e = new Thread(e);
 		t_e.start();
